@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Image Synthesizer</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --text-color: #00ff41;
+            --accent-color: #00ff41;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Container for the form */
+        #interface-container {
+            width: 400px;
+            text-align: center;
+            border: 1px solid #333;
+            padding: 40px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        input, button {
+            background: black;
+            border: 1px solid #333;
+            color: var(--text-color);
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+            font-family: var(--font-main);
+            box-sizing: border-box;
+        }
+
+        button {
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: var(--text-color);
+            color: black;
+        }
+
+        /* The "Secret" Overlay */
+        #processing-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Fake Progress Bar */
+        #progress-container {
+            width: 60%;
+            height: 4px;
+            background: #222;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.2s linear;
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        #status-text {
+            margin-top: 15px;
+            font-size: 14px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #image-result {
+            margin-top: 20px;
+            max-width: 100%;
+            border: 2px solid var(--accent-color);
+            display: none;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2);
+        }
+
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="interface-container">
+        <h2>QUANTUM_RENDER V1.0</h2>
+        <p style="font-size: 12px; margin-bottom: 20px; opacity: 0.7;">CONNECTED TO: GEMINI_NEURAL_NET</p>
+        
+        <input type="password" id="api-key" placeholder="PASTE GEMINI API KEY HERE">
+        
+        <input type="text" id="prompt-input" placeholder="ENTER VISUAL PARAMETERS..." value="A futuristic city with flying cars, cyberpunk style">
+        
+        <button onclick="startFabrication()">INITIATE RENDER</button>
+    </div>
+
+    <div id="processing-overlay">
+        <h3 class="blink">PROCESSING REQUEST...</h3>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="status-text">INITIALIZING HANDSHAKE...</div>
+        <img id="image-result" alt="Generated Output">
+        <button id="close-overlay" style="width: 200px; margin-top: 20px; display: none;" onclick="resetInterface()">NEW PROCESS</button>
+    </div>
+
+    <script>
+        // 1. CONFIGURATION
+        const FAKE_DURATION_MS = 8000; // The fake timer (8 seconds)
+        const FAKE_MESSAGES = [
+            "Parsing semantic vectors...",
+            "Allocating GPU tensors...",
+            "Synthesizing light paths...",
+            "Diffusing noise patterns...",
+            "Optimizing pixel density...",
+            "Rendering final output..."
+        ];
+
+        async function startFabrication() {
+            const apiKey = document.getElementById('api-key').value;
+            const prompt = document.getElementById('prompt-input').value;
+
+            if (!apiKey || !prompt) {
+                alert("ERROR: MISSING INPUT CREDENTIALS");
+                return;
+            }
+
+            // SHOW THE FAKE UI
+            const overlay = document.getElementById('processing-overlay');
+            const progressBar = document.getElementById('progress-bar');
+            const statusText = document.getElementById('status-text');
+            const imgResult = document.getElementById('image-result');
+            const closeBtn = document.getElementById('close-overlay');
+            
+            overlay.style.display = 'flex';
+            imgResult.style.display = 'none';
+            closeBtn.style.display = 'none';
+            progressBar.style.width = '0%';
+
+            // --- START THE RACE ---
+            
+            // TRACKER 1: The Real API Call
+            let realImagePromise = callGeminiAPI(apiKey, prompt);
+            
+            // TRACKER 2: The Fake Timer
+            let fakeProgressPromise = new Promise(resolve => {
+                let progress = 0;
+                let step = 100 / (FAKE_DURATION_MS / 100); // Increment calculation
+                
+                let timer = setInterval(() => {
+                    progress += step;
+                    
+                    // Update Text Randomly
+                    if (Math.random() > 0.9) {
+                        statusText.innerText = FAKE_MESSAGES[Math.floor(Math.random() * FAKE_MESSAGES.length)];
+                    }
+
+                    // Cap progress at 98% until real data arrives
+                    if (progress > 98) progress = 98;
+                    
+                    progressBar.style.width = progress + "%";
+                }, 100);
+
+                // This promise resolves after the minimum fake duration
+                setTimeout(() => {
+                    clearInterval(timer);
+                    resolve(true); 
+                }, FAKE_DURATION_MS);
+            });
+
+            try {
+                // Wait for BOTH the timer AND the real image
+                // If API is fast, we wait for timer. If API is slow, we wait for API.
+                const [_, imageData] = await Promise.all([fakeProgressPromise, realImagePromise]);
+
+                // FINISH LINE
+                statusText.innerText = "RENDER COMPLETE";
+                progressBar.style.width = "100%";
+                
+                // Show Image
+                imgResult.src = imageData;
+                imgResult.style.display = 'block';
+                closeBtn.style.display = 'block';
+
+            } catch (error) {
+                statusText.innerText = "SYSTEM FAILURE: " + error.message;
+                progressBar.style.background = "red";
+            }
+        }
+
+        async function callGeminiAPI(key, userPrompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${key}`;
+            
+            const payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {"text": userPrompt}
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                   "responseModalities": ["IMAGE"]
+                }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error?.message || "API Connection Failed");
+            }
+
+            const data = await response.json();
+            
+            // Extract the base64 image from the Gemini response
+            const base64Img = data.candidates[0].content.parts[0].inlineData.data;
+            const mimeType = data.candidates[0].content.parts[0].inlineData.mimeType; // usually image/jpeg
+            
+            return `data:${mimeType};base64,${base64Img}`;
+        }
+
+        function resetInterface() {
+            document.getElementById('processing-overlay').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
