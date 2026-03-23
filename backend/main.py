@@ -5,7 +5,7 @@ from typing import Optional
 from style_modifier import apply_style
 from prompt_intelligence import expand_prompt
 from safety_filter import is_safe
-from image_generator import generate_image
+from image_generator import generate_image, generate_image_edit
 from database import save_generation, get_all_generations, delete_generation, delete_edit, get_generation_by_id
 
 app = FastAPI(title="Smart AI Image Generator")
@@ -20,7 +20,8 @@ app.add_middleware(
 class GenerateRequest(BaseModel):
     prompt: str
     style: str = "realistic"
-    parent_id: Optional[str] = None  # set when editing
+    parent_id: Optional[str] = None
+    original_image_base64: Optional[str] = None  # sent when editing
 
 @app.get("/")
 def root():
@@ -33,7 +34,22 @@ def generate(req: GenerateRequest):
 
     expanded = expand_prompt(req.prompt)
     styled_prompt = apply_style(expanded, req.style)
-    image_base64 = generate_image(styled_prompt)
+    is_edit = req.parent_id is not None and req.original_image_base64 is not None
+
+    if is_edit:
+        # Use img2img — pass the original image + edit instruction
+        image_base64 = generate_image_edit(
+            edit_prompt=styled_prompt,
+            original_image_base64=req.original_image_base64
+        )
+        # If img2img API fails, fall back to text2img with blended prompt
+        if not image_base64:
+            parent = get_generation_by_id(req.parent_id)
+            if parent:
+                blended = f"{parent['expanded_prompt']}. Changes: {expanded}"
+                image_base64 = generate_image(blended)
+    else:
+        image_base64 = generate_image(styled_prompt)
 
     if not image_base64:
         return {"error": "Image generation failed. Try again."}
@@ -52,7 +68,7 @@ def generate(req: GenerateRequest):
         "expanded_prompt": expanded,
         "styled_prompt": styled_prompt,
         "image_base64": image_base64,
-        "is_edit": req.parent_id is not None
+        "is_edit": is_edit
     }
 
 @app.get("/history")
