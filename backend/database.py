@@ -1,9 +1,14 @@
+import os
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
 
-client = MongoClient("mongodb://localhost:27017/")
-db = client["synthia_db"]
+# Fetch the Atlas connection string securely from Render
+MONGO_URI = os.getenv("MONGO_URI")
+client = MongoClient(MONGO_URI)
+
+# Match the exact database name you created in Atlas
+db = client["synthia_DB"]
 collection = db["generations"]
 
 def save_generation(original_prompt, expanded_prompt, style, image_base64, parent_id=None):
