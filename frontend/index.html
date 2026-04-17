@@ -536,7 +536,7 @@ async function handleGenerate(){
       body.original_image_base64=editOriginalBase64;
     }
 
-    const res=await fetch('http://127.0.0.1:8000/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const res = await fetch('https://ai-img-gen-j2yg.onrender.com/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const data=await res.json();
     stopLoader(isEdit);
 
@@ -589,7 +589,7 @@ async function loadGallery(){
   const container=document.getElementById('gallery-container');
   container.innerHTML='<div style="color:var(--muted);font-size:13px;padding:20px 0">Loading...</div>';
   try {
-    const res=await fetch('http://127.0.0.1:8000/history');
+    const res = await fetch('https://ai-img-gen-j2yg.onrender.com/history');
     const items=await res.json();
     const total=items.reduce((acc,item)=>acc+1+(item.edits?item.edits.length:0),0);
     document.getElementById('gallery-count').textContent=total;
@@ -673,7 +673,7 @@ function cancelDelete(){pendingDeleteId=null;pendingDeleteType=null;document.get
 async function confirmDelete(){
   if(!pendingDeleteId)return;
   document.getElementById('delete-toast').classList.remove('show');
-  const url=pendingDeleteType==='edit'?`http://127.0.0.1:8000/edit/${pendingDeleteId}`:`http://127.0.0.1:8000/history/${pendingDeleteId}`;
+  const url = pendingDeleteType === 'edit' ? `https://ai-img-gen-j2yg.onrender.com/edit/${pendingDeleteId}` : `https://ai-img-gen-j2yg.onrender.com/history/${pendingDeleteId}`;
   try{
     await fetch(url,{method:'DELETE'});
     const elId=pendingDeleteType==='edit'?`edit-card-${pendingDeleteId}`:`bunch-${pendingDeleteId}`;
