@@ -33,8 +33,8 @@ def get_user_by_id(user_id):
     except:
         return None
 
-def update_user(user_id, name, email):
-    users.update_one({"_id": ObjectId(user_id)}, {"$set": {"name": name, "email": email}})
+def update_user(user_id, name):
+    users.update_one({"_id": ObjectId(user_id)}, {"$set": {"name": name}})
     return get_user_by_id(user_id)
 
 def delete_user(user_id):

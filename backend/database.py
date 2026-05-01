@@ -8,7 +8,7 @@ MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(MONGO_URI)
 
 # Match the exact database name you created in Atlas
-db = client["synthia_DB"]
+db = client["synthia_db"]
 collection = db["generations"]
 
 def format_doc(doc):
@@ -65,13 +65,13 @@ def delete_user_generations(user_id: str):
     collection.delete_many({"user_id": user_id})
 
 def get_generation_by_id(id: str):
-<<<<<<< Updated upstream
+
     doc = collection.find_one({"_id": ObjectId(id)})
     return format_doc(doc) if doc else None
-=======
+
     try:
         doc = collection.find_one({"_id": ObjectId(id)})
         return format_doc(doc) if doc else None
     except:
         return None
->>>>>>> Stashed changes
+

@@ -9,6 +9,7 @@ from image_generator import generate_image, generate_image_edit
 from database import save_generation, get_all_generations, delete_generation, delete_edit, get_generation_by_id, delete_user_generations
 from auth import hash_password, verify_password, create_token, decode_token
 from users_db import create_user, get_user_by_email, get_user_by_id, update_user, delete_user
+# from google import genai
 
 app = FastAPI(title="Smart AI Image Generator")
 
@@ -40,7 +41,6 @@ class LoginRequest(BaseModel):
 
 class UpdateRequest(BaseModel):
     name: str
-    email: str
 
 @app.post("/auth/signup")
 def signup(req: SignupRequest):
@@ -74,7 +74,7 @@ def update_profile(req: UpdateRequest, authorization: str = Header(None)):
     user = get_current_user(authorization)
     if not user:
         return {"error": "Unauthorized"}
-    updated = update_user(user["id"], req.name, req.email)
+    updated = update_user(user["id"], req.name)
     return {"user": {"id": updated["id"], "name": updated["name"], "email": updated["email"], "created_at": updated["created_at"]}}
 
 @app.delete("/auth/delete")
@@ -155,14 +155,13 @@ def delete(id: str, authorization: str = Header(None)):
     return {"success": delete_generation(id)}
 
 @app.delete("/edit/{id}")
-<<<<<<< Updated upstream
+
 def delete_one_edit(id: str):
     success = delete_edit(id)
     return {"success": success}
-=======
+
 def delete_one_edit(id: str, authorization: str = Header(None)):
     user = get_current_user(authorization)
     if not user:
         return {"error": "Unauthorized"}
     return {"success": delete_edit(id)}
->>>>>>> Stashed changes

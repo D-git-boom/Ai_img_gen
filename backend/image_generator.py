@@ -2,12 +2,15 @@ import requests
 import os
 import base64
 from dotenv import load_dotenv
+# from google import genai
 
 load_dotenv()
 
 HF_API_KEY = os.getenv("HF_API_KEY")
 
 TEXT2IMG_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell"
+# TEXT2IMG_URL = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-dev"
+# TEXT2IMG_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent"
 IMG2IMG_URL  = "https://router.huggingface.co/hf-inference/models/timbrooks/instruct-pix2pix"
 
 ASPECT_RATIOS = {
