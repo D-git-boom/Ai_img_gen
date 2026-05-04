@@ -2,8 +2,15 @@ from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
 
+#for Local Development, use the following 2 line:
 client = MongoClient("mongodb://localhost:27017/")
 db = client["synthia_db"]
+
+# for Production, use the following 3 line: 
+# MONGO_URI = os.getenv("MONGO_URI")
+# client = MongoClient(MONGO_URI)
+# db = client["synthia_DB"]
+
 users = db["users"]
 
 def format_user(doc):
