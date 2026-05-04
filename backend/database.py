@@ -3,12 +3,15 @@ from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
 
-# Fetch the Atlas connection string securely from Render
+#for Local Development, use the following 2 line:
+# client = MongoClient("mongodb://localhost:27017/")
+# db = client["synthia_db"]
+
+# for Production, use the following 3 line: 
 MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(MONGO_URI)
+db = client["synthia_DB"]
 
-# Match the exact database name you created in Atlas
-db = client["synthia_db"]
 collection = db["generations"]
 
 def format_doc(doc):
