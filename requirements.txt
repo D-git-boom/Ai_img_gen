@@ -8,3 +8,4 @@ pydantic==2.12.5
 huggingface_hub==1.6.0
 requests==2.32.5
 python-multipart==0.0.20
+bcrypt==4.1.2
